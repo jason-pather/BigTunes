@@ -1,5 +1,6 @@
 package com.example.jasonpather.bigtunes;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -9,10 +10,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ArrayList<Category> masterCategories = new ArrayList<>();
+    public static ArrayList<Category> masterCategories = new ArrayList<>();
     private Random rng;
 
     @Override
@@ -20,14 +22,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        initialise();
+        if (masterCategories.isEmpty()) {
+            initialise();
+        }
     }
 
     private void initialise() {
-        for (String category : masterCategoriesText) {
-            masterCategories.add(new Category(category));
-        }
-
+        masterCategories.addAll(masterCategoriesText.stream().map(x -> new Category(x)).collect(Collectors.toList()));
         rng = new Random();
     }
 
@@ -43,19 +44,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void editCategories(View view) {
+        Intent intent = new Intent(this, EditCategoriesActivity.class);
+        startActivity(intent);
+    }
+
     private boolean finished() {
-        for (Category cat : masterCategories) {
-            if (!cat.isUsed()) {
-                return false;
-            }
-        }
-        return true;
+        return !(masterCategories.stream().filter(x -> !x.isUsed()).count() > 0);
     }
 
     private void restart() {
-        for (Category category : masterCategories) {
-            category.setUsed(false);
-        }
+        masterCategories.stream().forEach(x -> x.setUsed(false));
         rng = new Random();
         TextView textView = findViewById(R.id.categoryText);
         textView.setText("That's all the categories. Starting again by hitting NEXT.");
