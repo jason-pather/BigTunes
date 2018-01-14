@@ -1,6 +1,7 @@
 package com.example.jasonpather.bigtunes;
 
 import android.content.Intent;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -15,21 +16,28 @@ import java.util.stream.Collectors;
 public class MainActivity extends AppCompatActivity {
 
     public static ArrayList<Category> masterCategories = new ArrayList<>();
-    private Random rng;
+    private Random rng = new Random();
+    private int currentColour = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        setBackgroundColour();
+
         if (masterCategories.isEmpty()) {
+            intro();
             initialise();
         }
     }
 
+    private void intro() {
+
+    }
+
     private void initialise() {
         masterCategories.addAll(masterCategoriesText.stream().map(x -> new Category(x)).collect(Collectors.toList()));
-        rng = new Random();
     }
 
     public void nextCategory(View view) {
@@ -39,8 +47,26 @@ public class MainActivity extends AppCompatActivity {
         else
         {
             Category nextCategory = getRandomCategory();
+            setBackgroundColour();
             TextView textView = findViewById(R.id.categoryText);
             textView.setText(nextCategory.getText());
+        }
+    }
+
+    private void setBackgroundColour() {
+        ConstraintLayout mainLayout = findViewById(R.id.mainLayout);
+        mainLayout.setBackgroundColor(getRandomColour());
+    }
+
+    private int getRandomColour() {
+        while (true)
+        {
+            int[] backgroundColours = getResources().getIntArray(R.array.backgroundColors);
+            int nextColour = backgroundColours[rng.nextInt(backgroundColours.length)];
+            if (nextColour != currentColour) {
+                currentColour = nextColour;
+                return nextColour;
+            }
         }
     }
 
@@ -55,7 +81,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void restart() {
         masterCategories.stream().forEach(x -> x.setUsed(false));
-        rng = new Random();
         TextView textView = findViewById(R.id.categoryText);
         textView.setText("That's all the categories. Starting again by hitting NEXT.");
     }
@@ -77,6 +102,22 @@ public class MainActivity extends AppCompatActivity {
 
         return nextCategory;
     }
+
+    private static ArrayList<Integer> backgroundColours = new ArrayList<>(Arrays.asList(
+            R.color.red,
+            R.color.pink,
+            R.color.purple,
+            R.color.indigo,
+            R.color.blue,
+            R.color.cyan,
+            R.color.teal,
+            R.color.green,
+            R.color.light_green,
+            R.color.lime,
+            R.color.amber,
+            R.color.yellow,
+            R.color.orange,
+            R.color.deep_orange));
 
     private List<String> masterCategoriesText = new ArrayList<>(
             Arrays.asList("Song about killing someone",
